@@ -1,0 +1,54 @@
+.card {
+    height: 200px;
+    width: 200px;
+    border: 5px solid #000000;
+    border-radius: 15px;
+    cursor: pointer;
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 60px;
+}
+
+.red {
+    background-color: red;
+    cursor: not-allowed;
+}
+
+.blue {
+    background-color: blue;
+    cursor: not-allowed;
+
+}
+
+.yellow {
+    background-color: yellow;
+    cursor: not-allowed;
+
+}
+
+.green {
+    background-color: green;
+    cursor: not-allowed;
+}
+
+.tan {
+    background-color: tan;
+    cursor: not-allowed;
+}
+
+.darkgray {
+    background-color: darkgray;
+    cursor: not-allowed;
+}
+
+.CadetBlue {
+    background-color: CadetBlue;
+    cursor: not-allowed;
+}
+
+.mediumvioletred {
+    background-color: mediumvioletred;
+    cursor: not-allowed;
+}
