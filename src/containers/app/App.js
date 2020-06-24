@@ -10,22 +10,18 @@ import {
 import HighScore from "../../components/high-score/High-score";
 import Game from "../game/Game";
 import {withRouter} from "react-router-dom";
+import * as actionTypes from './../../store/actions';
+import {connect} from 'react-redux';
 
 
 class App extends Component {
-    state = {
-        userName: 'Adi',
-        size: 6
-    }
 
 
-    onSizeSelection(e) {
-        this.setState({size: e.target.value})
-    }
+
+
 
     onStartGame = () => {
-        console.log(this.props)
-        if (!this.state.userName.length) {
+        if (!this.props.name.length) {
             this.nameNotification();
             return;
         }
@@ -47,6 +43,7 @@ class App extends Component {
             <div className="app">
                 <header className="App-header">
                     <h1>Memory Game app</h1>
+                    <p>game is {this.props.isGameOn ? 'on!': 'off'}</p>
                     <nav>
                         <ul>
                             <li>
@@ -63,30 +60,29 @@ class App extends Component {
                     </nav>
                 </header>
                 <Switch>
-                        <Route path="/high-score">
-                            <HighScore/>
-                        </Route>
-                        <Route path="/Game">
-                            <Game
-                                size={this.state.size}
-                                name={this.state.userName}
-                                history={this.props.history}
-                            />
-                        </Route>
-                        <Route exact path="/">
-                            <div className="nameSection">
-                                <input onChange={(e) => this.setState({userName: e.target.value})} type="text"
-                                       placeholder='What is your name?' value={this.state.userName}/>
-                            </div>
-                            <Radio.Group onChange={this.onSizeSelection.bind(this)} value={this.state.size}>
-                                <Radio value={4}>4</Radio>
-                                <Radio value={6}>6</Radio>
-                                <Radio value={8}>8</Radio>
-                            </Radio.Group>
-                            <div>
-                                <Button onClick={this.onStartGame} type="primary">Yalla!</Button>
-                            </div>
-                        </Route>
+                    <Route path="/high-score">
+                        <HighScore/>
+                    </Route>
+                    <Route path="/Game">
+                        <Game
+
+                            history={this.props.history}
+                        />
+                    </Route>
+                    <Route exact path="/">
+                        <div className="nameSection">
+                            <input onChange={(e) => this.props.onNameChange(e.target.value)} type="text"
+                                   placeholder='What is your name?' value={this.props.name}/>
+                        </div>
+                        <Radio.Group onChange={(e)=>this.props.onSizeChange(e.target.value)} value={this.props.size}>
+                            <Radio value={4}>4</Radio>
+                            <Radio value={6}>6</Radio>
+                            <Radio value={8}>8</Radio>
+                        </Radio.Group>
+                        <div>
+                            <Button onClick={this.onStartGame} type="primary">Yalla!</Button>
+                        </div>
+                    </Route>
                 </Switch>
             </div>
         );
@@ -94,4 +90,19 @@ class App extends Component {
 
 }
 
-export default withRouter(App);
+const mapStateToProps = state => {
+    return {
+        size: state.size,
+        name: state.userName,
+        isGameOn: state.isGameOn
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        onNameChange: (value) => dispatch({type: actionTypes.ON_NAME_CHANGE, value: value}),
+        onSizeChange: (value) => dispatch({type: actionTypes.ON_SIZE_CHANGE, value: value})
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(App));

@@ -2,6 +2,8 @@ import React, {Component} from "react";
 import Card from "../../components/card/Card";
 import {notification, Row, Modal} from "antd";
 import styles from './Game.module.css'
+import * as actionTypes from './../../store/actions';
+import {connect} from 'react-redux';
 
 class Game extends Component {
     constructor(props) {
@@ -38,6 +40,7 @@ class Game extends Component {
 
 
     componentDidMount() {
+        this.props.onGameOn();
         this.initCards();
 
     }
@@ -82,11 +85,9 @@ class Game extends Component {
                 this.setState({cards: oldState, pairs: this.state.pairs + 1, alreadyFlipped: null},
                     () => {
                         if (this.props.size === this.state.pairs) {
-                            // game over! voctory!!
-                            // notification.success({
-                            //     message: 'VICTORY!!!!',
-                            //     description: 'You matched all the pairs!!!'
-                            // });
+                            // game over! victory!!
+                            this.props.onGameOff();
+
                             this.setState({gameEndedModal: true})
 
                         } else {
@@ -151,6 +152,7 @@ class Game extends Component {
     render() {
         return (
             <div>
+                <p>Y0, {this.props.name}, you are playing {this.props.size} pairs game!</p>
                 <div className={styles.moves}>Moves: {this.state.moves}</div>
                 <Row gutter={[16, 16]}>
                     {this.state.cards.map(c => <Card key={c.index} card={c} size={this.props.size} cardClickHandler={this.onCardClick}/>)}
@@ -170,5 +172,17 @@ class Game extends Component {
 
 
 }
+const mapStateToProps = state => {
+    return {
+        size: state.size,
+        name: state.userName
+    }
+}
 
-export default Game;
+const mapDispatchToProps = dispatch => {
+    return {
+        onGameOn: () => dispatch({type: actionTypes.ON_GAME_ON}),
+        onGameOff: () => dispatch({type: actionTypes.ON_GAME_OFF})
+    }
+}
+export default connect(mapStateToProps, mapDispatchToProps)(Game);
