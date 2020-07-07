@@ -2,3 +2,11 @@
 .app {
   text-align: center;
 }
+.name-input {
+  margin: 30px;
+  padding: 7px;
+}
+
+.start-game {
+  margin: 20px;
+}

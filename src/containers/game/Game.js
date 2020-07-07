@@ -14,14 +14,13 @@ class Game extends Component {
             alreadyFlipped: null,
             gamePaused: false,
             pairs: 0,
-            gameEndedModal: false
+            gameEndedModal: false,
+            isNewHighscore:false
         }
     }
 
-
     shuffle = (array) => {
-        var currentIndex = array.length, temporaryValue, randomIndex;
-
+        let currentIndex = array.length, temporaryValue, randomIndex;
         // While there remain elements to shuffle...
         while (0 !== currentIndex) {
 
@@ -34,28 +33,25 @@ class Game extends Component {
             array[currentIndex] = array[randomIndex];
             array[randomIndex] = temporaryValue;
         }
-
         return array;
     }
 
 
     componentDidMount() {
-        this.props.onGameOn();
         this.initCards();
-
     }
 
     initCards = () => {
+        this.props.onGameOn();
+
         const colorsArray = ['red', 'blue', 'green', 'yellow', 'red', 'blue', 'green', 'yellow'];
         if (this.props.size >= 6) {
-            colorsArray.push('darkgray', 'darkgray', 'tan' , 'tan');
+            colorsArray.push('darkgray', 'darkgray', 'tan', 'tan');
         }
         if (this.props.size === 8) {
-            colorsArray.push('mediumvioletred', 'mediumvioletred', 'CadetBlue' , 'CadetBlue');
+            colorsArray.push('mediumvioletred', 'mediumvioletred', 'CadetBlue', 'CadetBlue');
 
         }
-
-        // Check other sizes here!!!!!!!
         let cardsData = [];
         let index = 0;
         for (const color of colorsArray) {
@@ -70,16 +66,13 @@ class Game extends Component {
         if (this.state.gamePaused) {
             return;
         }
-
-        console.log(card);
         if (this.state.alreadyFlipped) {
             this.setState({moves: this.state.moves + 1})
             if (this.state.alreadyFlipped.color === card.color) {
                 // 2 cards flipped, a match!
-
                 let oldState = [...this.state.cards];
-                const i = oldState.findIndex(c=> c.index === card.index)
-                const iFlipped = oldState.findIndex(c=> c.index === this.state.alreadyFlipped.index)
+                const i = oldState.findIndex(c => c.index === card.index)
+                const iFlipped = oldState.findIndex(c => c.index === this.state.alreadyFlipped.index)
                 oldState[i].isDone = true;
                 oldState[iFlipped].isDone = true;
                 this.setState({cards: oldState, pairs: this.state.pairs + 1, alreadyFlipped: null},
@@ -87,6 +80,7 @@ class Game extends Component {
                         if (this.props.size === this.state.pairs) {
                             // game over! victory!!
                             this.props.onGameOff();
+                            this.setState({isNewHighscore: this.checkIfEnteredHighscore()})
 
                             this.setState({gameEndedModal: true})
 
@@ -97,47 +91,67 @@ class Game extends Component {
                             });
                         }
                     });
-
-
             } else {
                 // 2 cards flipped, no match
-                console.log('no match')
                 let oldState = [...this.state.cards];
-                const i = oldState.findIndex(c=> c.index === card.index)
+                const i = oldState.findIndex(c => c.index === card.index)
                 oldState[i].isFlipped = true;
                 this.setState({gamePaused: true})
 
                 setTimeout(() => {
-                    console.log('2 sec')
                     oldState[i].isFlipped = false;
-                    const iFlipped = oldState.findIndex(c=> c.index === this.state.alreadyFlipped.index)
+                    const iFlipped = oldState.findIndex(c => c.index === this.state.alreadyFlipped.index)
                     oldState[iFlipped].isFlipped = false;
                     this.setState({cards: oldState, alreadyFlipped: null, gamePaused: false});
 
                 }, 1000)
-
             }
 
         } else {
             // first card flip
-            console.log('first flip')
             let oldCards = [...this.state.cards];
-            const i = oldCards.findIndex(c=> c.index === card.index);
+            const i = oldCards.findIndex(c => c.index === card.index);
             oldCards[i].isFlipped = true;
             this.setState({cards: oldCards, alreadyFlipped: card})
-
         }
     }
 
-    startNewGame = e => {
-        console.log(e);
+    checkIfEnteredHighscore = () => {
+        // eslint-disable-next-line
+        switch (this.props.size) {
+
+            case 4:
+                if (this.state.moves <= this.props.highScore.four[this.props.highScore.four.length - 1].steps) {
+                    this.props.add4NewHighscore({name: this.props.name, steps: this.state.moves});
+                    return true
+                }
+                return false;
+
+            case 6:
+                if (this.state.moves <= this.props.highScore.six[this.props.highScore.six.length - 1].steps) {
+                    this.props.add6NewHighscore({name: this.props.name, steps: this.state.moves});
+                    return true;
+                }
+                return false;
+
+            case 8:
+                if (this.state.moves <= this.props.highScore.eight[this.props.highScore.four.length - 1].steps) {
+                    this.props.add8NewHighscore({name: this.props.name, steps: this.state.moves});
+                    return true;
+                }
+                return false;
+        }
+    }
+
+    startNewGame = () => {
         this.setState({
             cards: [],
             steps: 0,
             alreadyFlipped: null,
             gamePaused: false,
             pairs: 0,
-            gameEndedModal: false
+            gameEndedModal: false,
+            isNewHighscore:false
         }, () => {
             this.initCards();
         });
@@ -152,13 +166,14 @@ class Game extends Component {
     render() {
         return (
             <div>
-                <p>Y0, {this.props.name}, you are playing {this.props.size} pairs game!</p>
+                <p>Yo {this.props.name}, you are playing {this.props.size} pairs game!</p>
                 <div className={styles.moves}>Moves: {this.state.moves}</div>
-                <Row gutter={[16, 16]}>
-                    {this.state.cards.map(c => <Card key={c.index} card={c} size={this.props.size} cardClickHandler={this.onCardClick}/>)}
+                <Row gutter={[16, 16]} justify="center">
+                    {this.state.cards.map(c => <Card key={c.index} card={c} size={this.props.size}
+                                                     cardClickHandler={this.onCardClick}/>)}
                 </Row>
                 <Modal
-                    title="VICTORY!"
+                    title={this.state.isNewHighscore? 'NEW HIGH SCORE!!!' : 'VICTORY!'}
                     visible={this.state.gameEndedModal}
                     onOk={this.startNewGame}
                     onCancel={this.backHome}
@@ -172,17 +187,22 @@ class Game extends Component {
 
 
 }
+
 const mapStateToProps = state => {
     return {
-        size: state.size,
-        name: state.userName
+        size: state.game.size,
+        name: state.game.userName,
+        highScore: state.highscore
     }
 }
 
 const mapDispatchToProps = dispatch => {
     return {
         onGameOn: () => dispatch({type: actionTypes.ON_GAME_ON}),
-        onGameOff: () => dispatch({type: actionTypes.ON_GAME_OFF})
+        onGameOff: () => dispatch({type: actionTypes.ON_GAME_OFF}),
+        add4NewHighscore: (payload) => dispatch({type: actionTypes.ADD_4_NEW_HIGHSCORE, payload: payload}),
+        add6NewHighscore: (payload) => dispatch({type: actionTypes.ADD_6_NEW_HIGHSCORE, payload: payload}),
+        add8NewHighscore: (payload) => dispatch({type: actionTypes.ADD_8_NEW_HIGHSCORE, payload: payload}),
     }
 }
 export default connect(mapStateToProps, mapDispatchToProps)(Game);
